@@ -639,6 +639,7 @@ const noOpUIContext: ExtensionUIContext = {
 	setEditorText: () => {},
 	pasteToEditor: () => {},
 	getEditorText: () => "",
+	hasPendingEditorInput: () => false,
 	editor: async () => undefined,
 	addAutocompleteProvider: () => {},
 	get theme() {
@@ -8464,6 +8465,9 @@ export class AgentSession implements SettingsScope {
 			isIdle: () => !this.isStreaming,
 			abort: () => {
 				void this.abort();
+			},
+			interruptAndRestore: async () => {
+				throw new Error("interruptAndRestore unavailable in this mode");
 			},
 			hasPendingMessages: () => this.queuedMessageCount > 0,
 			shutdown: () => {

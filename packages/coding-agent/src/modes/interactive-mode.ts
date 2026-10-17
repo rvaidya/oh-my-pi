@@ -8388,6 +8388,10 @@ export class InteractiveMode implements InteractiveModeContext {
 	}
 
 	// Input handling
+	interruptAndRestore() {
+		return this.#inputController.interruptAndRestore();
+	}
+
 	handleCtrlC(): void {
 		this.#inputController.handleCtrlC();
 	}

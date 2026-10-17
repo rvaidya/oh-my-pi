@@ -173,38 +173,57 @@ describe("ExtensionRunner", () => {
 		);
 		const usage = { tokens: 1200, contextWindow: 8000, percent: 15 };
 		const compact = vi.fn(async () => {});
+		const actions = {
+			sendMessage: () => {},
+			sendUserMessage: () => {},
+			appendEntry: () => {},
+			setLabel: () => {},
+			getActiveTools: () => [],
+			getAllTools: () => [],
+			setActiveTools: async () => {},
+			getCommands: () => [],
+			setModel: async () => false,
+			getThinkingLevel: () => undefined,
+			setThinkingLevel: () => {},
+			getSessionName: () => undefined,
+			setSessionName: async () => {},
+		};
+		const contextActions = {
+			getModel: () => undefined,
+			isIdle: () => true,
+			abort: () => {},
+			hasPendingMessages: () => false,
+			shutdown: () => {},
+			getContextUsage: () => usage,
+			compact,
+			getSystemPrompt: () => [],
+		};
 
-		runner.initialize(
-			{
-				sendMessage: () => {},
-				sendUserMessage: () => {},
-				appendEntry: () => {},
-				setLabel: () => {},
-				getActiveTools: () => [],
-				getAllTools: () => [],
-				setActiveTools: async () => {},
-				getCommands: () => [],
-				setModel: async () => false,
-				getThinkingLevel: () => undefined,
-				setThinkingLevel: () => {},
-				getSessionName: () => undefined,
-				setSessionName: async () => {},
-			},
-			{
-				getModel: () => undefined,
-				isIdle: () => true,
-				abort: () => {},
-				hasPendingMessages: () => false,
-				shutdown: () => {},
-				getContextUsage: () => usage,
-				compact,
-				getSystemPrompt: () => [],
-			},
-		);
+		runner.initialize(actions, contextActions);
 
 		expect(runner.createContext().getContextUsage()).toEqual(usage);
 		await runner.createContext().compact("preserve current task");
 		expect(compact).toHaveBeenCalledWith("preserve current task");
+		await expect(runner.createContext().interruptAndRestore()).rejects.toThrow(
+			"interruptAndRestore unavailable in this mode",
+		);
+
+		const finishInterrupt = Promise.withResolvers<{ restoredHumanMessages: number; pendingImages: number }>();
+		const interruptAndRestore = vi.fn(() => finishInterrupt.promise);
+		runner.initialize(actions, { ...contextActions, interruptAndRestore }, undefined, undefined, "tui");
+		let settled = false;
+		const interrupted = runner
+			.createContext()
+			.interruptAndRestore()
+			.then(result => {
+				settled = true;
+				return result;
+			});
+		await Promise.resolve();
+		expect(settled).toBe(false);
+		finishInterrupt.resolve({ restoredHumanMessages: 2, pendingImages: 1 });
+		expect(await interrupted).toEqual({ restoredHumanMessages: 2, pendingImages: 1 });
+		expect(interruptAndRestore).toHaveBeenCalledTimes(1);
 	});
 
 	describe("shortcut conflicts", () => {
@@ -2551,6 +2570,7 @@ describe("ExtensionRunner", () => {
 					pasteToEditor: () => {},
 					setEditorText: () => {},
 					getEditorText: () => "",
+					hasPendingEditorInput: () => false,
 					editor: async () => undefined,
 					addAutocompleteProvider: () => {},
 					setEditorComponent: () => {},

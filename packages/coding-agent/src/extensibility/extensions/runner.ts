@@ -474,6 +474,7 @@ const noOpUIContext: ExtensionUIContext = {
 	setEditorText: () => {},
 	pasteToEditor: () => {},
 	getEditorText: () => "",
+	hasPendingEditorInput: () => false,
 	editor: async () => undefined,
 	addAutocompleteProvider: () => {},
 	setEditorComponent: () => {},
@@ -520,6 +521,9 @@ export class ExtensionRunner {
 	#isIdleFn: () => boolean = () => true;
 	#waitForIdleFn: () => Promise<void> = async () => {};
 	#abortFn: () => void = () => {};
+	#interruptAndRestoreFn = async (): Promise<{ restoredHumanMessages: number; pendingImages: number }> => {
+		throw new Error("interruptAndRestore unavailable in this mode");
+	};
 	#hasPendingMessagesFn: () => boolean = () => false;
 	#getContextUsageFn: () => ContextUsage | undefined = () => undefined;
 	#compactFn: (instructionsOrOptions?: string | CompactOptions) => Promise<void> = async () => {};
@@ -832,6 +836,7 @@ export class ExtensionRunner {
 		this.#getModel = contextActions.getModel;
 		this.#isIdleFn = contextActions.isIdle;
 		this.#abortFn = contextActions.abort;
+		if (contextActions.interruptAndRestore) this.#interruptAndRestoreFn = contextActions.interruptAndRestore;
 		this.#hasPendingMessagesFn = contextActions.hasPendingMessages;
 		this.#shutdownHandler = contextActions.shutdown;
 		if (contextActions.resolvePlanReview) this.#resolvePlanReviewFn = contextActions.resolvePlanReview;
@@ -1438,6 +1443,7 @@ export class ExtensionRunner {
 			models: createExtensionModelQuery(this.modelRegistry, this.settings, getModel),
 			isIdle: () => this.#isIdleFn(),
 			abort: () => this.#abortFn(),
+			interruptAndRestore: () => this.#interruptAndRestoreFn(),
 			hasPendingMessages: () => this.#hasPendingMessagesFn(),
 			shutdown: () => this.#shutdownHandler(),
 			resolvePlanReview: (reviewId, choice, input) => this.#resolvePlanReviewFn(reviewId, choice, input),

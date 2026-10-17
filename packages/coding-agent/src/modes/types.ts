@@ -127,6 +127,7 @@ export interface AgentHubOpenOptions {
 }
 
 export interface InteractiveModeContext {
+	interruptAndRestore(): Promise<{ restoredHumanMessages: number; pendingImages: number }>;
 	// UI access
 	ui: TUI;
 	readonly composer: Pick<Composer, "setRunActive">;

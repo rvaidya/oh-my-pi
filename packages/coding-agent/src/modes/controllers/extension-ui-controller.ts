@@ -175,6 +175,7 @@ export class ExtensionUiController {
 				this.ctx.ui.requestRender();
 			},
 			getEditorText: () => this.ctx.editor.getText(),
+			hasPendingEditorInput: () => this.ctx.editor.getText().length > 0 || this.ctx.editor.pendingImages.length > 0,
 			editor: (title, prefill, dialogOptions, editorOptions) =>
 				this.showCollabAwareEditor(title, prefill, dialogOptions, editorOptions),
 			addAutocompleteProvider: factory => this.ctx.addAutocompleteProvider(factory),
@@ -248,6 +249,7 @@ export class ExtensionUiController {
 			getModel: () => this.ctx.session.model,
 			isIdle: () => !this.ctx.session.isStreaming,
 			abort: () => this.ctx.session.abort({ reason: USER_INTERRUPT_LABEL }),
+			interruptAndRestore: () => this.ctx.interruptAndRestore(),
 			hasPendingMessages: () => this.ctx.session.queuedMessageCount > 0,
 			shutdown: () => this.ctx.requestShutdown(),
 			resolvePlanReview: (reviewId, choice, input) => this.ctx.resolvePlanReview(reviewId, choice, input),
@@ -479,6 +481,7 @@ export class ExtensionUiController {
 			getModel: () => this.ctx.session.model,
 			isIdle: () => !this.ctx.session.isStreaming,
 			abort: () => this.ctx.session.abort({ reason: USER_INTERRUPT_LABEL }),
+			interruptAndRestore: () => this.ctx.interruptAndRestore(),
 			hasPendingMessages: () => this.ctx.session.queuedMessageCount > 0,
 			shutdown: () => this.ctx.requestShutdown(),
 			resolvePlanReview: (reviewId, choice, input) => this.ctx.resolvePlanReview(reviewId, choice, input),

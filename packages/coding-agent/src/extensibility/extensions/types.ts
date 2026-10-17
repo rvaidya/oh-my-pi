@@ -362,6 +362,8 @@ export interface ExtensionUIContext {
 
 	/** Get the current text from the core input editor. */
 	getEditorText(): string;
+	/** Whether the core input editor contains text or pending image attachments. */
+	hasPendingEditorInput(): boolean;
 
 	/** Show a multi-line editor for text editing. */
 	editor(
@@ -675,6 +677,8 @@ export interface ExtensionContext {
 	isIdle(): boolean;
 	/** Abort the current agent operation */
 	abort(): void;
+	/** Session-wide interrupt: cancel non-human queued work, restore human input, await idle. */
+	interruptAndRestore(): Promise<{ restoredHumanMessages: number; pendingImages: number }>;
 	/** Whether there are queued messages waiting */
 	hasPendingMessages(): boolean;
 	/** Gracefully shutdown and exit. */
@@ -2138,6 +2142,7 @@ export interface ExtensionContextActions {
 	getModel: () => Model | undefined;
 	isIdle: () => boolean;
 	abort: () => void;
+	interruptAndRestore?: () => Promise<{ restoredHumanMessages: number; pendingImages: number }>;
 	hasPendingMessages: () => boolean;
 	shutdown: () => void;
 	resolvePlanReview?: (

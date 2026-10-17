@@ -1565,6 +1565,10 @@ export async function runRpcMode(session: AgentSession, options: RpcModeOptions 
 			return "";
 		}
 
+		hasPendingEditorInput(): boolean {
+			return false;
+		}
+
 		async editor(
 			title: string,
 			prefill?: string,

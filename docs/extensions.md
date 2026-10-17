@@ -123,6 +123,17 @@ Core methods:
 - `sendMessage`, `sendUserMessage`, `appendEntry`, `exec`
 - `getActiveTools`, `getAllTools`, `setActiveTools`
 - `getCommands`
+
+Interactive extensions may call `ctx.interruptAndRestore()` to cancel the current
+session-wide run, discard queued agent-authored work, and restore queued
+human-authored messages plus their attachments to the editor. It resolves only
+after the agent session has finished aborting and returns
+`{ restoredHumanMessages, pendingImages }`. This is a TUI-only operation; hosts
+that do not provide the action reject with an explicit unavailable error. It
+does not resume the restored human input. Extensions should not replace it with
+`ctx.abort()`, which does not restore the composer contents.
+- `ctx.ui.hasPendingEditorInput()` reports whether the TUI editor contains text
+  or pending image attachments. Headless extension UI contexts return `false`.
 - `getSessionName`, `setSessionName`
 - `setModel`, `getThinkingLevel`, `setThinkingLevel`
 - `getServiceTiers`, `setServiceTier`

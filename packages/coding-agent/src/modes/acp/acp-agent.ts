@@ -584,6 +584,7 @@ export function createAcpExtensionUiContext(
 		pasteToEditor: () => {},
 		setEditorText: () => {},
 		getEditorText: () => "",
+		hasPendingEditorInput: () => false,
 		editor: async (title, prefill, dialogOptions) => {
 			if (!supportsForm) return undefined;
 			const value = await elicitFromAcpClient(
