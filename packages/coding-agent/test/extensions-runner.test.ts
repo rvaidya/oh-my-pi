@@ -224,6 +224,11 @@ describe("ExtensionRunner", () => {
 		finishInterrupt.resolve({ restoredHumanMessages: 2, pendingImages: 1 });
 		expect(await interrupted).toEqual({ restoredHumanMessages: 2, pendingImages: 1 });
 		expect(interruptAndRestore).toHaveBeenCalledTimes(1);
+
+		runner.initialize(actions, contextActions);
+		await expect(runner.createContext().interruptAndRestore()).rejects.toThrow(
+			"interruptAndRestore unavailable in this mode",
+		);
 	});
 
 	describe("shortcut conflicts", () => {

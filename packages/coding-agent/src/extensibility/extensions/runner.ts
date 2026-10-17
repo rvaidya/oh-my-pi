@@ -489,6 +489,13 @@ const noOpUIContext: ExtensionUIContext = {
 	setToolsExpanded: () => {},
 };
 
+const interruptAndRestoreUnavailable = async (): Promise<{
+	restoredHumanMessages: number;
+	pendingImages: number;
+}> => {
+	throw new Error("interruptAndRestore unavailable in this mode");
+};
+
 interface ToolRegistrationScope {
 	pending: Set<Promise<void>>;
 	signal?: AbortSignal;
@@ -521,9 +528,7 @@ export class ExtensionRunner {
 	#isIdleFn: () => boolean = () => true;
 	#waitForIdleFn: () => Promise<void> = async () => {};
 	#abortFn: () => void = () => {};
-	#interruptAndRestoreFn = async (): Promise<{ restoredHumanMessages: number; pendingImages: number }> => {
-		throw new Error("interruptAndRestore unavailable in this mode");
-	};
+	#interruptAndRestoreFn = interruptAndRestoreUnavailable;
 	#hasPendingMessagesFn: () => boolean = () => false;
 	#getContextUsageFn: () => ContextUsage | undefined = () => undefined;
 	#compactFn: (instructionsOrOptions?: string | CompactOptions) => Promise<void> = async () => {};
@@ -836,7 +841,7 @@ export class ExtensionRunner {
 		this.#getModel = contextActions.getModel;
 		this.#isIdleFn = contextActions.isIdle;
 		this.#abortFn = contextActions.abort;
-		if (contextActions.interruptAndRestore) this.#interruptAndRestoreFn = contextActions.interruptAndRestore;
+		this.#interruptAndRestoreFn = contextActions.interruptAndRestore ?? interruptAndRestoreUnavailable;
 		this.#hasPendingMessagesFn = contextActions.hasPendingMessages;
 		this.#shutdownHandler = contextActions.shutdown;
 		if (contextActions.resolvePlanReview) this.#resolvePlanReviewFn = contextActions.resolvePlanReview;
