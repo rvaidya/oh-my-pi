@@ -267,6 +267,31 @@ describe("ExtensionUiController Ask dialog input", () => {
 });
 
 describe("ExtensionUiController editor UI", () => {
+	it("reports text, attached images, and an in-flight paste as pending input", async () => {
+		const harness = makeHarness();
+		const ui = await harness.init();
+		expect(ui.hasPendingEditorInput()).toBe(false);
+
+		harness.editor.setText("draft");
+		expect(ui.hasPendingEditorInput()).toBe(true);
+		harness.editor.setText("");
+
+		harness.editor.pendingImages.push({ type: "image", mimeType: "image/png", data: "aGVsbG8=" });
+		expect(ui.hasPendingEditorInput()).toBe(true);
+		harness.editor.pendingImages = [];
+
+		const paste = Promise.withResolvers<boolean>();
+		harness.editor.onPasteImage = () => paste.promise;
+		harness.inputController(async () => "");
+		harness.handleInput("\x1b[200~\x1b[201~");
+		expect(harness.editor.pasteInFlight).toBe(true);
+		expect(ui.hasPendingEditorInput()).toBe(true);
+
+		paste.resolve(false);
+		await new Promise(resolve => setTimeout(resolve, 0));
+		expect(ui.hasPendingEditorInput()).toBe(false);
+	});
+
 	it("requests a render after extension pasteToEditor mutates the prompt", async () => {
 		const harness = makeHarness();
 		const ui = await harness.init();

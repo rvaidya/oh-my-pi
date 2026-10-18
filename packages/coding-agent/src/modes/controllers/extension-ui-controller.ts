@@ -175,7 +175,10 @@ export class ExtensionUiController {
 				this.ctx.ui.requestRender();
 			},
 			getEditorText: () => this.ctx.editor.getText(),
-			hasPendingEditorInput: () => this.ctx.editor.getText().length > 0 || this.ctx.editor.pendingImages.length > 0,
+			hasPendingEditorInput: () =>
+				this.ctx.editor.getText().length > 0 ||
+				this.ctx.editor.pendingImages.length > 0 ||
+				this.ctx.editor.pasteInFlight,
 			editor: (title, prefill, dialogOptions, editorOptions) =>
 				this.showCollabAwareEditor(title, prefill, dialogOptions, editorOptions),
 			addAutocompleteProvider: factory => this.ctx.addAutocompleteProvider(factory),

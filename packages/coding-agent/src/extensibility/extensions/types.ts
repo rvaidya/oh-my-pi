@@ -362,7 +362,7 @@ export interface ExtensionUIContext {
 
 	/** Get the current text from the core input editor. */
 	getEditorText(): string;
-	/** Whether the core input editor contains text or pending image attachments. */
+	/** Whether the editor has text, attached images, or an asynchronous paste in flight. */
 	hasPendingEditorInput(): boolean;
 
 	/** Show a multi-line editor for text editing. */
